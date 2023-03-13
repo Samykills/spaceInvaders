@@ -9,12 +9,11 @@ module.exports = {
   devServer: {
     static: "./public",
     hot: true,
-    client: false,
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   plugins: [
-    // new HtmlWebpackPlugin({
-    //   title: "Hot Module Replacement",
-    // }),
     // Plugin for hot module replacement
     new webpack.HotModuleReplacementPlugin(),
   ],
@@ -37,5 +36,6 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "public/dist"),
+    publicPath: "/dist/",
   },
 };
