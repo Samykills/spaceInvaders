@@ -1,8 +1,11 @@
-import { canvasContext } from "../helper/getCanvas";
+import { canvas, canvasContext } from "../helper/getCanvas";
 import { Vector } from "../types/vector";
-import Icon from "../images/spaceship.png";
+import spaceShipIcon from "../images/spaceship.png";
+import KeyboardInput from "./keyboardInput";
+import { KEY_MAPPINGS } from "../const/keymappings";
 
-class Player {
+class Player extends KeyboardInput {
+  private scaleOfPlayer = 0.15;
   private position: Vector = {
     x: 0,
     y: 0,
@@ -14,30 +17,67 @@ class Player {
   };
   private width: number = 100;
   private height: number = 100;
-
-  private playerImage: HTMLImageElement = new Image(this.width, this.height);
+  private playerImage: HTMLImageElement | undefined;
 
   constructor() {
-    this.position = {
-      x: 100,
-      y: 200,
-    };
+    super();
     this.velocity = {
       x: 0,
       y: 0,
     };
-    this.playerImage.src = Icon;
+
+    this.loadIImageAndSetPlayer();
+    this.addKeyBoardListeners();
   }
 
+  private loadIImageAndSetPlayer = () => {
+    const loadImage = new Image();
+    loadImage.src = spaceShipIcon;
+    loadImage.onload = () => {
+      this.playerImage = loadImage;
+      this.width = loadImage.width * this.scaleOfPlayer;
+      this.height = loadImage.height * this.scaleOfPlayer;
+
+      // inital position
+      this.position = {
+        x: canvas!.width / 2 - this.width / 2,
+        y: canvas!.height - this.height - 20,
+      };
+    };
+  };
+
   public draw = () => {
-    canvasContext!.fillStyle = "red";
-    canvasContext?.fillRect(
+    canvasContext?.drawImage(
+      this.playerImage!,
       this.position.x,
       this.position.y,
       this.width,
       this.height
     );
-    // canvasContext?.drawImage(this.playerImage,this.position.x, this.position.y)
+    this.position.x += this.velocity.x;
+  };
+
+  public update = () => {
+    if (this.playerImage) {
+      this.draw();
+      this._calculateMovement();
+    }
+  };
+
+  private _calculateMovement = () => {
+    if (
+      this._keyPressedMap.get(KEY_MAPPINGS.ARROW_LEFT) &&
+      this.position.x > 0
+    ) {
+      this.velocity.x = -5;
+    } else if (
+      this._keyPressedMap.get(KEY_MAPPINGS.ARROW_RIGHT) &&
+      this.position.x < canvas!.width - this.width
+    ) {
+      this.velocity.x = 5;
+    } else {
+      this.velocity.x = 0;
+    }
   };
 }
 
